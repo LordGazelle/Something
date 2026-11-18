@@ -1,0 +1,10 @@
+{
+  "name": "CHRONOS — камера, що бачить крізь час",
+  "short_name": "CHRONOS",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#05060c",
+  "theme_color": "#05060c",
+  "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>CHRONOS — камера, що бачить крізь час</title>
+  <meta name="description" content="Браузерна камера з ефектами реального часу на WebGL2: рідкий час, розлом часу, голограма, тепловізор, матриця та світлопис.">
+  <meta name="theme-color" content="#05060c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- WebGL сцена -->
+  <canvas id="gl"></canvas>
+  <video id="video" playsinline muted autoplay></video>
+
+  <!-- HUD поверх сцени -->
+  <div id="hud" aria-hidden="true">
+    <div class="hud-scan"></div>
+    <div class="hud-thermal">
+      <div class="reticle"><span></span><span></span><span></span><span></span></div>
+      <div class="temp"><b id="tempVal">--.-</b><small>°C</small></div>
+      <div class="scale"><i></i><em>ІЧ · 8–14 мкм</em></div>
+    </div>
+    <div class="hud-slit"><div class="bar"><i id="slitBar"></i></div></div>
+  </div>
+  <div id="flash"></div>
+
+  <!-- Верхня панель -->
+  <header id="top" class="ui">
+    <div class="brand">
+      <span class="orb"></span>
+      <span class="logo">CHRONOS</span>
+    </div>
+    <div id="recPill" class="pill rec-pill"><span class="dot"></span><span id="recTime">00:00</span></div>
+    <div class="top-actions">
+      <span id="fps" class="pill mono">-- fps</span>
+      <button id="btnFlip" class="icon-btn" aria-label="Змінити камеру">
+        <svg viewBox="0 0 24 24"><path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><path d="M9 12.5a3 3 0 0 1 5.2-2M15 11.5a3 3 0 0 1-5.2 2"/><path d="M14.4 8.6v1.9h-1.9M9.6 15.4v-1.9h1.9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Нижня панель -->
+  <footer id="bottom" class="ui">
+    <section id="card" class="glass">
+      <button id="cardHead" class="card-head" aria-expanded="true">
+        <div>
+          <div id="modeTag" class="tag">CHRONO · FLUX</div>
+          <div id="modeTitle" class="title">Рідкий час</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg>
+      </button>
+      <div class="card-body">
+        <div class="card-body-inner">
+          <p id="modeDesc" class="desc"></p>
+          <div id="controls" class="controls"></div>
+        </div>
+      </div>
+    </section>
+
+    <nav id="modes" class="modes" aria-label="Режими"></nav>
+
+    <div class="shutter-row">
+      <button id="thumb" class="thumb" aria-label="Остання знімка"><span class="thumb-empty"></span></button>
+      <button id="shutter" class="shutter" aria-label="Зробити фото"><span class="ring"></span><span class="core"></span></button>
+      <button id="btnRec" class="rec-btn" aria-label="Запис відео"><span></span></button>
+    </div>
+  </footer>
+
+  <!-- Перегляд знімка -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-inner glass">
+      <div id="sheetMedia" class="sheet-media"></div>
+      <div class="sheet-actions">
+        <button id="btnShare" class="btn">Поділитися</button>
+        <button id="btnSave" class="btn primary">Зберегти</button>
+        <button id="btnClose" class="btn ghost" aria-label="Закрити">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Заставка -->
+  <section id="intro">
+    <div class="aurora"><i></i><i></i><i></i></div>
+    <div class="grain"></div>
+    <div class="intro-inner">
+      <div class="eyebrow"><span class="orb"></span> WebGL2 · реальний час · на пристрої</div>
+      <h1><span>CHRO</span><span>NOS</span></h1>
+      <p class="lead">Камера, що бачить <em>крізь час</em>.<br>Шість неможливих способів подивитися на світ.</p>
+      <ul class="feat">
+        <li><b>01</b>Рідкий час</li>
+        <li><b>02</b>Розлом часу</li>
+        <li><b>03</b>Голограма</li>
+        <li><b>04</b>Тепловізор</li>
+        <li><b>05</b>Матриця</li>
+        <li><b>06</b>Світлопис</li>
+      </ul>
+      <button id="btnStart" class="start">
+        <span>Відкрити око</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <p id="introNote" class="note">Відео не залишає ваш телефон — уся магія рахується на GPU.</p>
+    </div>
+  </section>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
