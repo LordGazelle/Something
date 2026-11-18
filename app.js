@@ -648,7 +648,41 @@
     allocHistory();
     updateCover();
     if (hasRVFC) video.requestVideoFrameCallback(onVideoFrame);
+    if (lightOn) await applyLight(); // нова камера — заново вмикаємо світло
   }
+
+  // ---------------------------------------------------------------- світло
+  // 'torch' — справжній ліхтар телефона; 'screen' — підсвітка екраном; 'off'
+  let lightOn = false, lightMode = 'off';
+  function videoTrack() { return stream && stream.getVideoTracks()[0]; }
+  function torchSupported() {
+    const t = videoTrack();
+    try { return !!(t && t.getCapabilities && t.getCapabilities().torch); } catch (e) { return false; }
+  }
+  async function applyLight() {
+    const t = videoTrack();
+    let hw = false;
+    if (t && torchSupported()) {
+      try { await t.applyConstraints({ advanced: [{ torch: lightOn }] }); hw = true; }
+      catch (e) {
+        try { await t.applyConstraints({ torch: lightOn }); hw = true; } catch (e2) {}
+      }
+    }
+    lightMode = !lightOn ? 'off' : hw ? 'torch' : 'screen';
+    document.body.classList.toggle('ringlight', lightMode === 'screen');
+    const b = $('#btnLight');
+    b.classList.toggle('on', lightOn);
+    b.setAttribute('aria-pressed', lightOn);
+  }
+  $('#btnLight').onclick = async () => {
+    if (!running) return;
+    lightOn = !lightOn;
+    haptic(10);
+    await applyLight();
+    if (lightMode === 'torch') toast('Ліхтар увімкнено');
+    else if (lightMode === 'screen') toast(facing === 'user' ? 'Підсвітка екраном увімкнена' : 'Ліхтар недоступний — світить екран');
+    else toast('Світло вимкнено');
+  };
 
   async function begin() {
     const btn = $('#btnStart'), note = $('#introNote');
@@ -816,11 +850,21 @@
   // ---------------------------------------------------------------- фото / відео
   let shotPending = false, lastMedia = null;
   $('#shutter').onclick = () => {
-    if (!running) return;
-    shotPending = true;
+    if (!running || flashBusy) return;
     haptic(15);
-    const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+    const f = $('#flash');
+    if (lightMode === 'screen') {
+      // спалах екраном: біле світло освітлює обличчя, камера встигає підлаштувати експозицію
+      flashBusy = true;
+      f.classList.add('hold');
+      setTimeout(() => { shotPending = true; }, 420);
+      setTimeout(() => { f.classList.remove('hold'); flashBusy = false; }, 650);
+      return;
+    }
+    shotPending = true;
+    f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
   };
+  let flashBusy = false;
 
   function capturePhoto() {
     canvas.toBlob((blob) => {

@@ -259,3 +259,15 @@ h1 span:nth-child(2) { padding-left: .5em; animation-delay: -3s; }
   .feat { display: none; }
   .desc { display: none; }
 }
+
+/* ---------- світло ---------- */
+.icon-btn.on { background: #fff; color: #05060c; border-color: #fff; box-shadow: 0 0 22px rgba(255, 244, 220, .75); }
+.icon-btn.on svg { fill: currentColor; }
+/* кільцева лампа з екрана — коли апаратного ліхтаря немає (фронтальна камера, частина iPhone) */
+#ringlight {
+  position: fixed; inset: 0; z-index: 6; pointer-events: none; opacity: 0; transition: opacity .4s;
+  box-shadow: inset 0 0 0 max(16px, 3.4vmin) #fff7ec, inset 0 0 70px max(30px, 7vmin) rgba(255, 246, 232, .9);
+}
+body.ringlight #ringlight { opacity: 1; }
+/* спалах екраном для селфі: екран стає білим на мить зйомки */
+#flash.hold { opacity: 1; animation: none; background: #fff6ea; }

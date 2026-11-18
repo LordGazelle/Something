@@ -32,6 +32,7 @@
     </div>
     <div class="hud-slit"><div class="bar"><i id="slitBar"></i></div></div>
   </div>
+  <div id="ringlight" aria-hidden="true"></div>
   <div id="flash"></div>
 
   <!-- Верхня панель -->
@@ -43,6 +44,9 @@
     <div id="recPill" class="pill rec-pill"><span class="dot"></span><span id="recTime">00:00</span></div>
     <div class="top-actions">
       <span id="fps" class="pill mono">-- fps</span>
+      <button id="btnLight" class="icon-btn" aria-label="Ліхтар" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M13 2.5 5.5 13.2h5.6L10 21.5l8.5-11.2h-5.7L13 2.5Z"/></svg>
+      </button>
       <button id="btnFlip" class="icon-btn" aria-label="Змінити камеру">
         <svg viewBox="0 0 24 24"><path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><path d="M9 12.5a3 3 0 0 1 5.2-2M15 11.5a3 3 0 0 1-5.2 2"/><path d="M14.4 8.6v1.9h-1.9M9.6 15.4v-1.9h1.9"/></svg>
       </button>
