@@ -271,3 +271,4 @@ h1 span:nth-child(2) { padding-left: .5em; animation-delay: -3s; }
 body.ringlight #ringlight { opacity: 1; }
 /* спалах екраном для селфі: екран стає білим на мить зйомки */
 #flash.hold { opacity: 1; animation: none; background: #fff6ea; }
+.ver { opacity: .6; font-size: 11px; margin-left: 4px; }

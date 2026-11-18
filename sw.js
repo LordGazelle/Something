@@ -1,5 +1,5 @@
 // Простий офлайн-кеш оболонки застосунку
-const CACHE = 'chronos-v1';
+const CACHE = 'chronos-v3';
 const ASSETS = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
@@ -9,7 +9,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then((r) => {
+    fetch(e.request, { cache: 'no-cache' }).then((r) => {
       if (r.ok && new URL(e.request.url).origin === location.origin) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
       return r;
     }).catch(() => caches.match(e.request))
