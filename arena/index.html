@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>БРУХТ — арена залізного хаосу</title>
+  <meta name="description" content="Ретро-бойові перегони на машинах у браузері: руйнування, вибухи, боти й онлайн для друзів.">
+  <meta name="theme-color" content="#120a1c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="crt"></div>
+
+  <!-- ===================== HUD ===================== -->
+  <div id="hud" hidden>
+    <div class="hud-tl">
+      <div class="hp-wrap">
+        <div class="lbl"><span id="hudName">ГРІМ</span><span id="hpNum">100</span></div>
+        <div class="hp"><i id="hpBar"></i></div>
+        <div class="boost"><i id="boostBar"></i></div>
+      </div>
+    </div>
+    <div class="hud-tc">
+      <div id="timer">5:00</div>
+      <div id="fragInfo">0 / 15</div>
+    </div>
+    <div class="hud-tr">
+      <canvas id="radar" width="120" height="120"></canvas>
+      <div id="feed"></div>
+    </div>
+    <div id="roomBadge" hidden><span>КІМНАТА <b id="roomCode">-----</b></span><button id="btnShareRoom">ЗАПРОСИТИ</button><em id="roomPlayers"></em></div>
+    <button id="btnPause" class="pix-btn small" aria-label="Меню">II</button>
+    <div class="hud-bc">
+      <div id="weapon" class="slot"><div class="ico" id="wIco">—</div><div><div id="wName">НЕМАЄ ЗБРОЇ</div><div id="wAmmo" class="dim">шукай червоні ящики</div></div></div>
+      <div id="special" class="slot sp"><div class="ring"><i id="spFill"></i><b id="spIco">★</b></div><div><div id="spName">ЗАЛП</div><div id="spState" class="dim">ГОТОВО</div></div></div>
+    </div>
+    <div id="center"></div>
+    <div id="toast"></div>
+
+    <!-- сенсорне керування -->
+    <div id="touch" hidden>
+      <div id="stickZone"><div id="stick"><i></i></div><span class="hint">КЕРМО · ГАЗ ↑ · ГАЛЬМО ↓</span></div>
+      <div class="btns">
+        <button data-btn="fire" class="tb big fire">ВОГОНЬ</button>
+        <button data-btn="alt" class="tb alt">ЗБРОЯ</button>
+        <button data-btn="special" class="tb sp">СУПЕР</button>
+        <button data-btn="brake" class="tb drift">ЗАНОС</button>
+        <button data-btn="boost" class="tb turbo">ТУРБО</button>
+        <button data-btn="next" class="tb next">⇄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ТАБЛО ===================== -->
+  <div id="scores" hidden>
+    <div class="panel">
+      <h2 id="scoresTitle">ТАБЛО</h2>
+      <table><thead><tr><th>#</th><th>ГРАВЕЦЬ</th><th>МАШИНА</th><th>ВБ.</th><th>СМ.</th></tr></thead><tbody id="scoresBody"></tbody></table>
+      <p id="scoresNote" class="dim"></p>
+    </div>
+  </div>
+
+  <!-- ===================== ПАУЗА ===================== -->
+  <div id="pause" hidden>
+    <div class="panel">
+      <h2>ПАУЗА</h2>
+      <button class="pix-btn" id="btnResume">ПРОДОВЖИТИ</button>
+      <button class="pix-btn ghost" id="btnMusic">МУЗИКА: ТАК</button>
+      <button class="pix-btn ghost" id="btnSfx">ЗВУК: ТАК</button>
+      <button class="pix-btn ghost" id="btnScores">ТАБЛО</button>
+      <button class="pix-btn danger" id="btnQuit">ВИЙТИ В МЕНЮ</button>
+    </div>
+  </div>
+
+  <!-- ===================== МЕНЮ ===================== -->
+  <div id="menu">
+    <div class="logo">
+      <h1 data-t="БРУХТ">БРУХТ</h1>
+      <p>АРЕНА ЗАЛІЗНОГО ХАОСУ</p>
+    </div>
+    <div class="menu-grid">
+      <section class="panel car-pick">
+        <div class="row-title">ОБЕРИ МАШИНУ</div>
+        <div class="car-nav">
+          <button class="pix-btn small" id="carPrev">◀</button>
+          <div class="car-name" id="carName">ГРІМ</div>
+          <button class="pix-btn small" id="carNext">▶</button>
+        </div>
+        <p class="car-desc" id="carDesc"></p>
+        <div class="stats" id="carStats"></div>
+        <div class="car-sp">СУПЕРЗДІБНІСТЬ: <b id="carSp"></b></div>
+      </section>
+      <section class="panel play">
+        <label class="field"><span>ПОЗИВНИЙ</span><input id="nick" maxlength="12" autocomplete="off" spellcheck="false"></label>
+        <div class="field"><span>БОТИ</span>
+          <div class="seg" id="botSeg"></div>
+        </div>
+        <button class="pix-btn" id="btnSolo">▶ ГРА З БОТАМИ</button>
+        <button class="pix-btn alt" id="btnHost">⚑ СТВОРИТИ ОНЛАЙН-КІМНАТУ</button>
+        <div class="join-row">
+          <input id="joinCode" placeholder="КОД" maxlength="5" autocomplete="off" spellcheck="false">
+          <button class="pix-btn alt" id="btnJoin">ПРИЄДНАТИСЯ</button>
+        </div>
+        <p id="menuMsg" class="msg"></p>
+        <div class="settings">
+          <button class="pix-btn ghost small" id="btnQuality">ПІКСЕЛІ: 300</button>
+        </div>
+      </section>
+    </div>
+    <div class="help">
+      <span><b>WASD</b> рух</span><span><b>ПРОБІЛ</b> занос</span><span><b>SHIFT</b> турбо</span><span><b>J / ЛКМ</b> кулемет</span>
+      <span><b>K / ПКМ</b> зброя</span><span><b>Q</b> змінити</span><span><b>E</b> супер</span><span><b>C</b> назад</span><span><b>TAB</b> табло</span>
+    </div>
+  </div>
+
+  <div id="rotate">ПОВЕРНИ ТЕЛЕФОН ГОРИЗОНТАЛЬНО ↻</div>
+  <div id="loading">ЗАВАНТАЖЕННЯ…</div>
+
+  <script src="vendor/peerjs.min.js"></script>
+  <script type="module" src="js/main.js?v=1"></script>
+</body>
+</html>
