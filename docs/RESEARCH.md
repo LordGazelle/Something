@@ -9,7 +9,8 @@ _Листопад 2026. Джерела — внизу. Рейтинги скіл
 | **Donchitos/Claude-Code-Game-Studios** | Набір «студії»: скіли для архітектури, код-рев'ю, ролі гейм-розробки | Подивитися структуру й запозичити ідеї ролей. Цілком не ставити, бо це зайвий контекст |
 | **davila7/claude-code-templates → game-development** | Оркестратор, що спрямовує до платформних скілів | Корисний як шаблон |
 | **sickn33/antigravity-awesome-skills → game-development** | Загальний гейм-дев скіл, популярний | Прочитати, взяти потрібне |
-| Рушієві скіли (Godot / Unity / Unreal) | Лідери за встановленнями | **Нам не потрібні**, бо гра браузерна |
+| Рушієві скіли: **godot-gdscript-patterns** (лідер за встановленнями), Unity C# | Патерни рушія: сигнали, сцени, стейт-машини | **Так**, під обраний рушій (гра нативна, див. розділ 4) |
+| **Godot MCP-сервери** (Coding-Solo/godot-mcp, hybridindie/godot-mcp, godot-ai) | Claude керує живим редактором Godot: сцени, вузли, запуск, логи | **Так** для Godot. Почати з найпростішого (Coding-Solo), безпекову частину перевірити самому |
 | **anthropic skill-creator** (вже доступний) | Створення й тестування власних скілів | **Так**: власні вузькі скіли кращі за чужі загальні |
 
 **Головний висновок.** Найбільший виграш дають не чужі «мега-скіли», а **власні вузькі скіли під наш код**. Приклад уже є в репозиторії: `.claude/skills/add-spell`. Загальні скіли з'їдають контекст і часто суперечать архітектурі проєкту. План власних скілів:
@@ -62,17 +63,38 @@ _Листопад 2026. Джерела — внизу. Рейтинги скіл
 - **Claude Code:** реалізація за специфікацією, тести, Playwright-перевірки, рефакторинг, оновлення `STATUS.md`.
 - **Людина:** приймає рішення в `DECISIONS.md`, грає плейтести, мержить PR.
 
-## 4. Стек для повноцінної гри
+## 4. Стек для повноцінної гри (нативна, ПК / Steam)
 
-Висновок з огляду (деталі в `ROADMAP.md`):
-- **Мова:** TypeScript скрізь, монорепозиторій (`packages/shared`, `server`, `client`).
-- **Сервер:** **Colyseus**. Open-source (MIT), Node.js, авторитетні кімнати, матчмейкінг і синхронізація стану вже вбудовані. Альтернатива — власний сервер, як у прототипі, якщо потрібен повний контроль.
-- **Клієнт 2D:** **Phaser 4** (вийшов у 2026) або PixiJS (лише рендер, більше свободи). Пара Phaser + Colyseus — найпоширеніша для браузерних PvP.
-- **Клієнт 3D (якщо захочеться):** PlayCanvas або Babylon.js. Colyseus має з ними офіційні приклади.
-- **Дані гравця й прокачка:** PostgreSQL + авторизація (наприклад, через Supabase або власний сервіс).
-- **Хостинг:** Fly.io / Hetzner / Colyseus Cloud. Регіон — Європа.
+Повна гра буде **нативною**, не браузерною. Браузерний прототип лишається полігоном для плейтестів і балансу.
 
-Версії й ціни з оглядових статей не звірені з офіційними сайтами. Перевір перед фінальним вибором.
+### Порівняння рушіїв для нашого жанру (top-down арена, 2–10 гравців, PvP)
+
+| | **Godot 4 (C#)** | **Unity 6** | Unreal 5 |
+|---|---|---|---|
+| Ліцензія / ціна | MIT, безкоштовно, без роялті | Безкоштовно до порогу доходу, потім підписка | 5% роялті після $1M |
+| Мережа | High-level multiplayer (ENet), RPC, `MultiplayerSynchronizer`. Лобі, матчмейкінг і NAT вирішуєш сам: GodotSteam / Steam Networking або власний relay | Netcode for GameObjects (безкоштовний), FishNet (безкоштовний, сильне передбачення), Photon Fusion (платний, топ для PvP), а також Relay і Dedicated Server у комплекті | Найкраща вбудована реплікація, але важкий для маленької 2.5D гри |
+| Робота з AI-агентами | ✅ Сцени `.tscn` — читабельний текст. Є кілька MCP-серверів, через які Claude керує редактором. Є скіли GDScript | ⚠️ Сцени й префаби в YAML з GUID, і агенту важче їх правити | ⚠️ Blueprints бінарні, тож агент їх фактично не бачить |
+| Ризики | Мережу для змагальної гри доведеться дописувати (передбачення, лаг-компенсація) | Залежність від політики Unity, важчий редактор | Надмірний для жанру |
+
+### Рекомендація: **Godot 4 + C#**, власна авторитетна симуляція
+
+Чому:
+1. **Найкраще підходить для роботи з AI.** Текстові сцени, код без «магії» редактора, MCP-сервери. Claude і Codex зможуть повноцінно правити й запускати проєкт.
+2. **Логіка гри нескладна:** кола, імпульси, снаряди. Вбудована фізика не потрібна, симуляцію ми пишемо самі, як у прототипі. Тож головна сильна сторона Unity (готовий нетворк-стек) для нас важить менше.
+3. **Безкоштовно і без роялті.** Головний мінус — немає готового лобі й передбачення. Закриваємо так:
+   - **Архітектура:** детермінована симуляція в окремій C#-бібліотеці `Warlock.Sim`, без залежності від рушія. Її запускають і сервер, і клієнт для передбачення. Ця ж бібліотека дає швидкі тести й ботів-симуляторів для балансу.
+   - **Сервер:** headless-збірка Godot або чистий .NET-процес з `Warlock.Sim`. Матчі на виділених серверах. Транспорт — ENet (UDP), пізніше Steam Networking Sockets для лобі й NAT.
+   - **Лобі, друзі, інвайти:** Steamworks через GodotSteam / Steamworks.NET.
+   - **Акаунти, прогресія, рейтинг:** окремий бекенд (наприклад, Nakama, open-source, або власний .NET + PostgreSQL).
+
+**Коли краще Unity:** якщо в команді вже є досвід Unity або хочеться готового передбачення без власного коду. Тоді Unity 6 + FishNet (безкоштовно) або Photon Fusion (платно).
+
+### Що перенести з прототипу
+- `shared/config.js` → `data/spells.json` (дані спелів і баланс). Обидві версії читають один формат.
+- Формули відкидання, звуження арени, кулдаунів, магазину й ботів переписуються на C# 1:1.
+- Протокол наміри → знімки лишається, додається передбачення власного руху.
+
+Версії, ціни й ліцензійні пороги звір з офіційними сайтами перед фінальним вибором. Огляди 2026 року розходяться в цифрах.
 
 ## Джерела
 - [Best Game Development Skills for Claude Code (2026)](https://claudeskills.info/best/gaming-skills/)
@@ -93,3 +115,13 @@ _Листопад 2026. Джерела — внизу. Рейтинги скіл
 - [Claude Code memory bank pattern](https://nsclass.github.io/2026/03/15/claude-memory-bank)
 - [Context management for large codebases](https://script-kit.github.io/claude-research/docs/core/context-management/patterns/large-codebases)
 - [Context management and project setup (SDD)](https://www.educative.io/courses/claude-code/context-management-and-project-setup)
+- [Godot vs Unity 2026](https://tech-insider.org/godot-vs-unity-2026/)
+- [Godot multiplayer: що є і чого немає](https://ziva.sh/blogs/godot-multiplayer)
+- [Godot 4 multiplayer vs Unity (Rivet)](https://rivet.dev/blog/godot-multiplayer-compared-to-unity/)
+- [Godot forum: multiplayer architecture for Steam](https://forum.godotengine.org/t/deciding-on-multiplayer-architecture-for-steam/140817)
+- [Unity 6 multiplayer manual](https://docs.unity3d.com/Manual/multiplayer-new.html)
+- [Unity: how to choose the right netcode](https://unity.com/blog/games/how-to-choose-the-right-netcode-for-your-game)
+- [NGO vs Mirror vs FishNet (Unity discussions)](https://discussions.unity.com/t/so-what-is-the-difference-between-netcode-for-gameobjects-mirror-and-fishnet-which-one-is-better-for-fast-co-op/1678432)
+- [Coding-Solo/godot-mcp](https://claudemarketplaces.com/mcp/coding-solo/godot-mcp)
+- [hybridindie/godot-mcp](https://github.com/hybridindie/godot-mcp)
+- [Godot MCP server + addon (forum)](https://forum.godotengine.org/t/godot-free-open-source-mcp-server-addon/133890)
