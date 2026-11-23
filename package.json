@@ -1,0 +1,29 @@
+{
+  "name": "warlock-arena",
+  "version": "0.1.0",
+  "description": "Browser multiplayer Warlocks-like prototype",
+  "main": "server/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "sim": "node scripts/sim.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LordGazelle/Something.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LordGazelle/Something/issues"
+  },
+  "homepage": "https://github.com/LordGazelle/Something#readme",
+  "dependencies": {
+    "ws": "^8.23.0"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
