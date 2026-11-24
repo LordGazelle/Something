@@ -45,7 +45,21 @@ const makeCode = () => {
 
 const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 4096 });
 
+// Пінг, щоб хостинг/проксі не рвав неактивні з'єднання (наприклад, у лобі)
+setInterval(() => {
+  for (const ws of wss.clients) {
+    if (ws.isAlive === false) {
+      ws.terminate();
+      continue;
+    }
+    ws.isAlive = false;
+    ws.ping();
+  }
+}, 25000);
+
 wss.on('connection', (ws) => {
+  ws.isAlive = true;
+  ws.on('pong', () => (ws.isAlive = true));
   let room = null;
   let playerId = null;
   let msgCount = 0;

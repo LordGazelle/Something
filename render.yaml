@@ -1,0 +1,11 @@
+# Конфіг для Render: один клік — і гра доступна за постійним посиланням.
+services:
+  - type: web
+    name: warlock-arena
+    runtime: node
+    plan: free
+    branch: claude/warlock-game-browser-concept-ibbw6w
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true

@@ -26,6 +26,16 @@
 
 Працює на будь-якій розкладці, зокрема кириличній, бо гра читає фізичні клавіші.
 
+## Грати онлайн без встановлення
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/LordGazelle/Something/tree/claude/warlock-game-browser-concept-ibbw6w)
+
+1. Натисни кнопку, увійди в Render через GitHub і натисни **Deploy**. Це робиться один раз, безкоштовно.
+2. Через 2–3 хвилини отримаєш постійне посилання `https://warlock-arena-xxxx.onrender.com`.
+3. Скидаєш його другу. Обидва відкриваєте в браузері, і можна грати.
+
+Безкоштовний сервер засинає після 15 хвилин без гравців. Перше відкриття після цього займає близько хвилини.
+
 ## Запуск
 
 Потрібен Node.js 18 або новіший.
